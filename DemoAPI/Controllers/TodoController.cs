@@ -5,7 +5,7 @@ using System.Linq;
 
 namespace DemoAPI.Controllers
 {
-    [Route("api/todo")]
+    [Route("api/todos")]
     public class TodoController : Controller
     {
         private readonly TodoContext _context;
@@ -16,7 +16,7 @@ namespace DemoAPI.Controllers
 
             if (_context.TodoItems.Count() == 0)
             {
-                _context.TodoItems.Add(new TodoItem { Name = "Item1" });
+                _context.TodoItems.Add(new TodoItem { Name = "Start-up todo" });
                 _context.SaveChanges();
             }
         }
@@ -36,6 +36,24 @@ namespace DemoAPI.Controllers
                 return NotFound();
             }
             return new ObjectResult(item);
+        }
+
+        [HttpPost]
+        public IActionResult Create([FromBody] TodoItem item)
+        {
+            if (item == null)
+            {
+                return BadRequest("must provide a body for the response");
+            }
+            if (item.Name == null) 
+            {
+                return BadRequest("todos must have a name field");     
+            }
+
+            _context.TodoItems.Add(item);
+            _context.SaveChanges();
+
+            return CreatedAtRoute("GetTodo", new { id = item.Id }, item);
         }
     }
 }
